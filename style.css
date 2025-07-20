@@ -49,6 +49,11 @@ h1 {
   text-align: center;
 }
 
+#materialTable img {
+  width: 32px;
+  height: 32px;
+}
+
 @media (max-width: 600px) {
   #materialTable, #materialTable thead, #materialTable tbody, #materialTable th, #materialTable td, #materialTable tr {
     display: block;
