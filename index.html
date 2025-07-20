@@ -1,734 +1,103 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>材料清单汇总</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 1.5rem;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1a202c;
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #edf2f7;
-        }
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 1.5rem;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-        th, td {
-            padding: 1rem 1.25rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        th {
-            background-color: #4a5568;
-            color: #fff;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr:nth-child(even) {
-            background-color: #f7fafc;
-        }
-        tr:hover {
-            background-color: #ebf8ff;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .total-row {
-            font-weight: 700;
-            background-color: #e0f2f7;
-        }
-        .total-row td {
-            border-top: 2px solid #a0aec0;
-        }
-        .search-container {
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-        }
-        .search-input {
-            padding: 0.75rem 1rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 400px;
-            font-size: 1rem;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        .status-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        .status-button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .status-button:hover {
-            transform: translateY(-2px);
-        }
-        .status-button.all {
-            background-color: #4299e1;
-            color: #fff;
-        }
-        .status-button.all:hover {
-            background-color: #3182ce;
-        }
-        .status-button.missing {
-            background-color: #f56565;
-            color: #fff;
-        }
-        .status-button.missing:hover {
-            background-color: #e53e3e;
-        }
-        .status-button.collected {
-            background-color: #48bb78;
-            color: #fff;
-        }
-        .status-button.collected:hover {
-            background-color: #38a169;
-        }
-        .missing-count {
-            font-weight: 700;
-            color: #f56565;
-        }
-        .collected-count {
-            font-weight: 700;
-            color: #48bb78;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minecraft 材料统计 Demo</title>
+  <style>
+    body {
+      font-family: 'Press Start 2P', sans-serif;
+      background-color: #2c2c2c;
+      color: #f0f0f0;
+      padding: 1em;
+      margin: 0;
+    }
 
-        /* Styles for the new collected quantity controls */
-        .collected-control {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-            gap: 0.25rem; /* Smaller gap between buttons */
-            justify-content: center; /* Center buttons within the cell */
-        }
-        .collected-display {
-            min-width: 40px; /* Ensure space for number */
-            text-align: center;
-            font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 4px;
-            background-color: #f7fafc;
-        }
-        .control-button {
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            font-size: 0.8rem; /* Smaller font for buttons */
-            min-width: 40px; /* Ensure buttons have a minimum width */
-        }
-        .control-button.minus {
-            background-color: #e53e3e;
-            color: #fff;
-        }
-        .control-button.minus:hover {
-            background-color: #c53030;
-            transform: translateY(-1px);
-        }
-        .control-button.plus {
-            background-color: #48bb78;
-            color: #fff;
-        }
-        .control-button.plus:hover {
-            background-color: #38a169;
-            transform: translateY(-1px);
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #4a5568;
-        }
-        .error-message {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 0, 0, 0.8);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 1001;
-            font-size: 1.2rem;
-            padding: 20px;
-            text-align: center;
-        }
-    </style>
+    .container {
+      max-width: 960px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1em;
+      font-size: 1.2em;
+    }
+
+    .upload {
+      background: #3a3a3a;
+      border: 4px solid #707070;
+      padding: 1em;
+      margin-bottom: 1em;
+      text-align: center;
+    }
+
+    .upload input {
+      padding: 0.5em;
+      font-size: 0.9em;
+      border: none;
+      background-color: #5e5e5e;
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #464646;
+    }
+
+    th, td {
+      border: 1px solid #707070;
+      padding: 0.5em;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        margin-bottom: 0.5em;
+      }
+      th {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">加载中...</div>
-    <div class="error-message" id="errorMessage" style="display: none;">
-        <p>无法连接到数据存储服务。</p>
-        <p>请确保您正在通过本地Web服务器（例如 `http://localhost:8000`）运行此文件，而不是直接从本地文件系统打开。</p>
-        <p>详细错误请查看浏览器控制台。</p>
+  <div class="container">
+    <h1>Minecraft 材料统计</h1>
+    <div class="upload">
+      <label for="csvUpload">📥 选择 CSV 文件：</label><br>
+      <input type="file" id="csvUpload" accept=".csv">
     </div>
 
-    <div class="container">
-        <h1>材料清单汇总</h1>
-
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="搜索材料...">
-        </div>
-
-        <div class="status-buttons">
-            <button class="status-button all" onclick="filterTable('all')">显示全部</button>
-            <button class="status-button missing" onclick="filterTable('missing')">显示未收集</button>
-            <button class="status-button collected" onclick="filterTable('collected')">显示已收集</button>
-        </div>
-
-        <table id="materialTable">
-            <thead>
-                <tr>
-                    <th>材料</th>
-                    <th>总计</th>
-                    <th>总计 (组)</th>
-                    <th>总计 (潜影盒)</th>
-                    <th>已收集</th>
-                    <th>未收集</th>
-                    <th>状态</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Materials will be inserted here by JavaScript -->
-            </tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td>总计</td>
-                    <td id="totalItems">0</td>
-                    <td id="totalStacks">0</td>
-                    <td id="totalShulkerBoxes">0</td>
-                    <td id="totalCollected">0</td>
-                    <td id="totalMissing">0</td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-
-    <script type="module">
-        // Firebase imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global variables for Firebase configuration (provided by the Canvas environment)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase services immediately
-        let app;
-        let db;
-        let auth;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch (e) {
-            console.error("Firebase initialization failed:", e);
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.style.display = 'flex';
-            document.getElementById('loadingOverlay').style.display = 'none';
-            // Fallback to raw data if Firebase init fails
-            aggregatedMaterials = aggregateMaterialsFromRaw(rawData);
-            renderTable(aggregatedMaterials);
-            // Prevent further execution if Firebase initialization is critical
-            throw new Error("Firebase initialization failed. Check your configuration and network.");
-        }
-
-        let userId = null;
-        let aggregatedMaterials = {};
-        let currentFilter = 'all'; // Default filter
-
-        // Raw data from the uploaded files (used as initial data if no saved data)
-        const rawData = [
-            `+---------+-------+---------+-----------+
-| 原理图'[猎光号] 空间站-动力舱段'材料清单（1/1区域）        |
-+---------+-------+---------+-----------+
-| Item    | Total | Missing | Available |
-+---------+-------+---------+-----------+
-| 平滑石英块   |  3170 |    3170 |         0 |
-| 磨制深板岩   |  2562 |    2562 |         0 |
-| 灰色混凝土   |  2098 |    2098 |         0 |
-| 青色陶瓦    |  1766 |    1766 |         0 |
-| 磨制深板岩楼梯 |  1702 |    1702 |         0 |
-| 磨制深板岩墙  |  1650 |    1650 |         0 |
-| 黑色染色玻璃  |  1628 |    1628 |         0 |
-| 磨制闪长岩楼梯 |   920 |     920 |         0 |
-| 磨制闪长岩   |   915 |     915 |         0 |
-| 平滑石头台阶  |   566 |     566 |         0 |
-| 平滑石英楼梯  |   546 |     546 |         0 |
-| 淡灰色染色玻璃 |   512 |     512 |         0 |
-| 铁活板门    |   428 |     428 |         0 |
-| 末地烛     |   392 |     392 |         0 |
-| 高炉      |   368 |     368 |         0 |
-| 黑色染色玻璃板 |   320 |     320 |         0 |
-| 橙色混凝土   |   304 |     304 |         0 |
-| 闪长岩墙    |   299 |     299 |         0 |
-| 铁块      |   284 |     284 |         0 |
-| 平滑石头    |   280 |     280 |         0 |
-| 菌光体     |   274 |     274 |         0 |
-| 铁栏杆     |   266 |     266 |         0 |
-| 深板岩     |   256 |     256 |         0 |
-| 深板岩瓦    |   256 |     256 |         0 |
-| 灰色染色玻璃  |   256 |     256 |         0 |
-| 黑色羊毛    |   256 |     256 |         0 |
-| 海晶灯     |   201 |     201 |         0 |
-| 磨制安山岩   |   196 |     196 |         0 |
-| 磨制闪长岩台阶 |   172 |     172 |         0 |
-| 磨制深板岩台阶 |   168 |     168 |         0 |
-| 避雷针     |   148 |     148 |         0 |
-| 侦测器     |   140 |     140 |         0 |
-| 锁链      |   120 |     120 |         0 |
-| 铁砧      |   114 |     114 |         0 |
-| 平滑红砂岩楼梯 |   104 |     104 |         0 |
-| 深板岩瓦楼梯  |    84 |      84 |         0 |
-| 橙色染色玻璃板 |    80 |      80 |         0 |
-| 砂轮      |    72 |      72 |         0 |
-| 熔岩桶     |    64 |      64 |         0 |
-| 金合欢木活板门 |    64 |      64 |         0 |
-| 岩浆块     |    52 |      52 |         0 |
-| 蜂蜜块     |    52 |      52 |         0 |
-| 拉杆      |    48 |      48 |         0 |
-| 橙色染色玻璃  |    48 |      48 |         0 |
-| 红石粉     |    43 |      43 |         0 |
-| 玻璃      |    40 |      40 |         0 |
-| 白色染色玻璃  |    37 |      37 |         0 |
-| 红石火把    |    32 |      32 |         0 |
-| 红石灯     |    32 |      32 |         0 |
-| 红砂岩墙    |    32 |      32 |         0 |
-| 花盆      |    32 |      32 |         0 |
-| 金合欢木按钮  |    32 |      32 |         0 |
-| 淡蓝色染色玻璃 |    20 |      20 |         0 |
-| 炼药锅     |     8 |       8 |         0 |
-| 石头压力板   |     8 |       8 |         0 |
-| 诡异木活板门  |     8 |       8 |         0 |
-| 铜块      |     8 |       8 |         0 |
-| 红石中继器   |     7 |       7 |         0 |
-| 红石块     |     2 |       2 |         0 |
-| 钻石块     |     2 |       2 |         0 |
-| 黏性活塞    |     1 |       1 |         0 |
-+---------+-------+---------+-----------+
-| Item    | Total | Missing | Available |
-+---------+-------+---------+-----------+`,
-            `+---------+-------+---------+-----------+
-| 原理图'[猎光号]空间站 - 物质传送环'材料清单（1/1区域）      |
-+---------+-------+---------+-----------+
-| Item    | Total | Missing | Available |
-+---------+-------+---------+-----------+
-| 平滑石英块   |  3446 |    3446 |         0 |
-| 磨制深板岩   |  2412 |    2412 |         0 |
-| 黑色染色玻璃  |  1342 |    1342 |         0 |
-| 磨制深板岩墙  |  1100 |    1100 |         0 |
-| 灰色混凝土   |  1060 |    1060 |         0 |
-| 磨制深板岩楼梯 |   960 |     960 |         0 |
-| 青色陶瓦    |   904 |     904 |         0 |
-| 闪长岩墙    |   856 |     856 |         0 |
-| 磨制闪长岩   |   648 |     648 |         0 |
-| 磨制闪长岩楼梯 |   640 |     640 |         0 |
-| 铁活板门    |   368 |     368 |         0 |
-| 铁块      |   324 |     324 |         0 |
-| 平滑石头    |   284 |     284 |         0 |
-| 平滑石英楼梯  |   208 |     208 |         0 |
-| 平滑石头台阶  |   176 |     176 |         0 |
-| 海晶灯     |   144 |     144 |         0 |
-| 淡灰色染色玻璃 |   144 |     144 |         0 |
-| 磨制闪长岩台阶 |   128 |     128 |         0 |
-| 末地烛     |   104 |     104 |         0 |
-| 砂轮      |    96 |      96 |         0 |
-| 岩浆块     |    88 |      88 |         0 |
-| 熔岩桶     |    88 |      88 |         0 |
-| 玻璃      |    88 |      88 |         0 |
-| 黏液块     |    72 |      72 |         0 |
-| 侦测器     |    64 |      64 |         0 |
-| 磨制深板岩台阶 |    64 |      64 |         0 |
-| 石头按钮    |    56 |      56 |         0 |
-| 磨制安山岩   |    56 |      56 |         0 |
-| 平滑红砂岩楼梯 |    48 |      48 |         0 |
-| 避雷针     |    48 |      48 |         0 |
-| 金合欢木活板门 |    48 |      48 |         0 |
-| 黑色染色玻璃板 |    48 |      48 |         0 |
-| 蜂蜜块     |    38 |      38 |         0 |
-| 橙色混凝土   |    32 |      32 |         0 |
-| 菌光体     |    30 |      30 |         0 |
-| 红砂岩墙    |    24 |      24 |         0 |
-| 平滑石英台阶  |    16 |      16 |         0 |
-| 磨制安山岩楼梯 |    16 |      16 |         0 |
-| 高炉      |    16 |      16 |         0 |
-| 拉杆      |     8 |       8 |         0 |
-| 诡异木活板门  |     8 |       8 |         0 |
-| 铜块      |     8 |       8 |         0 |
-| 花盆      |     4 |       4 |         0 |
-| 钻石块     |     1 |       1 |         0 |
-+---------+-------+---------+-----------+
-| Item    | Total | Missing | Available |
-+---------+-------+---------+-----------+`,
-            `+----------+-------+---------+-----------+
-| 原理图'[猎光号] 空间站-星舰工厂'材料清单（1/1区域）         |
-+----------+-------+---------+-----------+
-| Item     | Total | Missing | Available |
-+----------+-------+---------+-----------+
-| 平滑石英块    |  4278 |    4278 |         0 |
-| 青色陶瓦     |  2756 |    2756 |         0 |
-| 灰色混凝土    |  2266 |    2266 |         0 |
-| 磨制深板岩    |  1962 |    1962 |         0 |
-| 磨制深板岩墙   |  1554 |    1554 |         0 |
-| 平滑石英楼梯   |   968 |     968 |         0 |
-| 磨制闪长岩楼梯  |   948 |     948 |         0 |
-| 平滑石头     |   935 |     935 |         0 |
-| 磨制深板岩楼梯  |   828 |     828 |         0 |
-| 黑色染色玻璃   |   628 |     628 |         0 |
-| 平滑石头台阶   |   461 |     461 |         0 |
-| 磨制闪长岩    |   450 |     450 |         0 |
-| 末地烛      |   377 |     377 |         0 |
-| 闪长岩墙     |   369 |     369 |         0 |
-| 橙色混凝土    |   280 |     280 |         0 |
-| 铁栏杆      |   274 |     274 |         0 |
-| 菌光体      |   252 |     252 |         0 |
-| 高炉       |   216 |     216 |         0 |
-| 铁活板门     |   210 |     210 |         0 |
-| 金合欢木活板门  |   186 |     186 |         0 |
-| 磨制安山岩楼梯  |   176 |     176 |         0 |
-| 磨制安山岩    |   120 |     120 |         0 |
-| 铁块       |   116 |     116 |         0 |
-| 砂轮       |   110 |     110 |         0 |
-| 拉杆       |   108 |     108 |         0 |
-| 铁砧       |   108 |     108 |         0 |
-| 海晶灯      |   100 |     100 |         0 |
-| 磨制深板岩台阶  |    92 |      92 |         0 |
-| 红砂岩墙     |    72 |      72 |         0 |
-| 烟熏炉      |    52 |      52 |         0 |
-| 石头压力板    |    52 |      52 |         0 |
-| 平滑红砂岩楼梯  |    48 |      48 |         0 |
-| 平滑石英台阶   |    43 |      43 |         0 |
-| 避雷针      |    42 |      42 |         0 |
-| 花盆       |    36 |      36 |         0 |
-| 侦测器      |    32 |      32 |         0 |
-| 蜂蜜块      |    32 |      32 |         0 |
-| 熔岩桶      |    20 |      20 |         0 |
-| 石头按钮     |    16 |      16 |         0 |
-| 红石火把     |    16 |      16 |         0 |
-| 黄色混凝土    |    16 |      16 |         0 |
-| 涂蜡的切制铜楼梯 |    12 |      12 |         0 |
-| 涂蜡的铜块    |     8 |       8 |         0 |
-| 铁门       |     8 |       8 |         0 |
-| 发射器      |     3 |       3 |         0 |
-| 漏斗       |     3 |       3 |         0 |
-+----------+-------+---------+-----------+
-| Item     | Total | Missing | Available |
-+----------+-------+---------+-----------+`
-        ];
-
-        // Function to parse the raw text data into a structured format
-        function parseMaterialList(text) {
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line.startsWith('|') && !line.includes('---') && !line.includes('Item') && !line.includes('原理图'));
-            const materials = {};
-
-            lines.forEach(line => {
-                const parts = line.split('|').map(part => part.trim()).filter(part => part !== '');
-                if (parts.length >= 4) {
-                    const item = parts[0];
-                    const total = parseInt(parts[1], 10);
-
-                    if (materials[item]) {
-                        materials[item].total += total;
-                    } else {
-                        materials[item] = {
-                            total: total,
-                            collected: 0 // Initialize collected to 0
-                        };
-                    }
-                }
-            });
-            return materials;
-        }
-
-        // Aggregate all materials from multiple lists
-        function aggregateMaterialsFromRaw(data) {
-            const allMaterials = {};
-            data.forEach(text => {
-                const currentMaterials = parseMaterialList(text);
-                for (const item in currentMaterials) {
-                    if (allMaterials[item]) {
-                        allMaterials[item].total += currentMaterials[item].total;
-                    } else {
-                        allMaterials[item] = { ...currentMaterials[item] };
-                    }
-                }
-            });
-            return allMaterials;
-        }
-
-        // Function to render the table
-        function renderTable(materials) {
-            const tbody = document.querySelector('#materialTable tbody');
-            tbody.innerHTML = ''; // Clear existing rows
-
-            let totalItemsCount = 0;
-            let totalCollectedCount = 0;
-            let totalMissingCount = 0;
-            let totalStacksCount = 0;
-            let totalShulkerBoxesCount = 0;
-
-            for (const item in materials) {
-                const material = materials[item];
-                const missing = material.total - material.collected;
-                const status = missing === 0 ? '已收集' : '未收集';
-
-                // Calculate stacks and shulker boxes for display
-                const stacks = Math.ceil(material.total / 64);
-                const shulkerBoxes = Math.ceil(material.total / (64 * 27));
-
-                // Apply filter
-                if (currentFilter === 'missing' && status === '已收集') continue;
-                if (currentFilter === 'collected' && status === '未收集') continue;
-
-                const row = tbody.insertRow();
-                row.dataset.itemName = item; // Store item name for search
-                row.dataset.status = status === '已收集' ? 'collected' : 'missing'; // Store status for filtering
-
-                row.innerHTML = `
-                    <td>${item}</td>
-                    <td>${material.total}</td>
-                    <td>${stacks}</td>
-                    <td>${shulkerBoxes}</td>
-                    <td>
-                        <div class="collected-control">
-                            <button class="control-button minus" onclick="window.adjustCollected('${item}', -${64 * 27})">-1盒</button>
-                            <button class="control-button minus" onclick="window.adjustCollected('${item}', -64)">-1组</button>
-                            <button class="control-button minus" onclick="window.adjustCollected('${item}', -1)">-1</button>
-                            <span class="collected-display">${material.collected}</span>
-                            <button class="control-button plus" onclick="window.adjustCollected('${item}', 1)">+1</button>
-                            <button class="control-button plus" onclick="window.adjustCollected('${item}', 64)">+1组</button>
-                            <button class="control-button plus" onclick="window.adjustCollected('${item}', ${64 * 27})">+1盒</button>
-                        </div>
-                    </td>
-                    <td class="${missing > 0 ? 'missing-count' : 'collected-count'}">${missing}</td>
-                    <td>${status}</td>
-                `;
-
-                totalItemsCount += material.total;
-                totalCollectedCount += material.collected;
-                totalMissingCount += missing;
-            }
-
-            // Calculate overall totals for stacks and shulker boxes based on total items
-            totalStacksCount = Math.ceil(totalItemsCount / 64);
-            totalShulkerBoxesCount = Math.ceil(totalItemsCount / (64 * 27));
-
-
-            document.getElementById('totalItems').textContent = totalItemsCount;
-            document.getElementById('totalStacks').textContent = totalStacksCount;
-            document.getElementById('totalShulkerBoxes').textContent = totalShulkerBoxesCount;
-            document.getElementById('totalCollected').textContent = totalCollectedCount;
-            document.getElementById('totalMissing').textContent = totalMissingCount;
-        }
-
-        // Function to adjust collected quantity and save to Firestore
-        window.adjustCollected = async function(item, amount) {
-            const material = aggregatedMaterials[item];
-            if (!material) return;
-
-            let newCollected = material.collected + amount;
-
-            // Ensure collected amount doesn't go below 0 or above total
-            newCollected = Math.max(0, Math.min(newCollected, material.total));
-
-            material.collected = newCollected;
-            renderTable(aggregatedMaterials); // Re-render the table to reflect changes
-            await saveMaterials(aggregatedMaterials); // Save to Firestore
-        }
-
-        // Function to filter the table based on status
-        window.filterTable = function(status) {
-            currentFilter = status;
-            renderTable(aggregatedMaterials);
-        }
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            const searchValue = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#materialTable tbody tr');
-            rows.forEach(row => {
-                const itemName = row.dataset.itemName.toLowerCase();
-                const rowStatus = row.dataset.status;
-
-                const matchesSearch = itemName.includes(searchValue);
-                const matchesFilter = (currentFilter === 'all') ||
-                                      (currentFilter === 'missing' && rowStatus === 'missing') ||
-                                      (currentFilter === 'collected' && rowStatus === 'collected');
-
-                if (matchesSearch && matchesFilter) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-
-        // Firestore functions
-        async function saveMaterials(materials) {
-            if (!userId) {
-                console.error("User not authenticated. Cannot save data.");
-                return;
-            }
-            try {
-                // Firestore has limitations on storing nested objects directly if they contain certain types.
-                // It's safer to stringify the object if it becomes too complex, but for this simple structure, it should be fine.
-                await setDoc(doc(db, `artifacts/${appId}/users/${userId}/materialLists`, 'currentList'), {
-                    materials: JSON.stringify(materials) // Store as JSON string
-                });
-                console.log("Materials saved successfully!");
-            } catch (error) {
-                console.error("Error saving materials: ", error);
-            }
-        }
-
-        async function loadMaterials() {
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const errorMessage = document.getElementById('errorMessage');
-            loadingOverlay.style.display = 'flex'; // Show loading overlay
-            errorMessage.style.display = 'none'; // Hide error message initially
-
-            try {
-                // Ensure user is authenticated before attempting to load
-                if (!userId) {
-                    console.warn("User not authenticated yet. Waiting for auth state change.");
-                    return; // Exit and wait for onAuthStateChanged to trigger data load
-                }
-
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/materialLists`, 'currentList');
-                onSnapshot(docRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        if (data && data.materials) {
-                            const loadedMaterials = JSON.parse(data.materials);
-                            // Merge loaded collected data with raw total data
-                            const initialTotals = aggregateMaterialsFromRaw(rawData);
-                            for (const item in initialTotals) {
-                                if (loadedMaterials[item] && typeof loadedMaterials[item].collected === 'number') {
-                                    initialTotals[item].collected = loadedMaterials[item].collected;
-                                }
-                            }
-                            aggregatedMaterials = initialTotals;
-                            console.log("Materials loaded successfully!");
-                        } else {
-                            // If document exists but no materials, initialize from raw data
-                            aggregatedMaterials = aggregateMaterialsFromRaw(rawData);
-                            console.log("No materials data found in Firestore, initializing from raw data.");
-                            saveMaterials(aggregatedMaterials); // Save initial data
-                        }
-                    } else {
-                        // Document does not exist, initialize from raw data
-                        aggregatedMaterials = aggregateMaterialsFromRaw(rawData);
-                        console.log("No saved material list found, initializing from raw data.");
-                        saveMaterials(aggregatedMaterials); // Save initial data
-                    }
-                    renderTable(aggregatedMaterials); // Render the table with loaded/initialized data
-                    loadingOverlay.style.display = 'none'; // Hide loading overlay
-                }, (error) => {
-                    console.error("Error listening to Firestore document: ", error);
-                    loadingOverlay.style.display = 'none';
-                    errorMessage.style.display = 'flex'; // Show error message
-                    aggregatedMaterials = aggregateMaterialsFromRaw(rawData); // Fallback to raw data on error
-                    renderTable(aggregatedMaterials);
-                });
-            } catch (error) {
-                console.error("Error loading materials: ", error);
-                loadingOverlay.style.display = 'none';
-                errorMessage.style.display = 'flex'; // Show error message
-                aggregatedMaterials = aggregateMaterialsFromRaw(rawData); // Fallback to raw data on error
-                renderTable(aggregatedMaterials);
-            }
-        }
-
-        // Authenticate user and then load data
-        // This listener is now set up after Firebase is initialized
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log("Authenticated with user ID:", userId);
-                await loadMaterials();
-            } else {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Firebase authentication error:", error);
-                    // Show specific error message for local file system issues
-                    const errorMessage = document.getElementById('errorMessage');
-                    errorMessage.style.display = 'flex';
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    // Fallback to raw data if authentication fails
-                    aggregatedMaterials = aggregateMaterialsFromRaw(rawData);
-                    renderTable(aggregatedMaterials);
-                }
-            }
-        });
-
-        // Initial render logic (removed redundant Firebase init and auth listener)
-        document.addEventListener('DOMContentLoaded', () => {
-            // The loading overlay is shown by default in HTML and hidden after data is loaded.
-            // Authentication and data loading are now handled by the onAuthStateChanged listener
-            // which is set up immediately after Firebase initialization.
-        });
-    </script>
+    <table>
+      <thead>
+        <tr>
+          <th>物品名称</th>
+          <th>总数</th>
+          <th>已有数</th>
+          <th>还需数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>石头</td>
+          <td>1000</td>
+          <td>400</td>
+          <td>600</td>
+        </tr>
+        <tr>
+          <td>橡木木板</td>
+          <td>500</td>
+          <td>250</td>
+          <td>250</td>
+        </tr>
+        <!-- 更多数据可通过 JS 动态生成 -->
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>
